@@ -560,6 +560,26 @@ const App = (function () {
     icToPartners: {},
   };
 
+  function normalizeZone(region) {
+    const r = String(region || '')
+      .trim()
+      .toLowerCase();
+
+    if (r.includes('south')) {
+      return 'South Zone';
+    }
+
+    if (r.includes('west')) {
+      return 'West Zone';
+    }
+
+    if (r.includes('north') || r.includes('east') || r.includes('ne')) {
+      return 'North-East Region';
+    }
+
+    return '';
+  }
+
   async function loadMasterFromGoogleSheet() {
     try {
       const url = `https://opensheet.elk.sh/${GOOGLE_SHEET_ID}/${GOOGLE_SHEET_NAME}`;
@@ -607,8 +627,9 @@ const App = (function () {
           master.icToRic[icName] = ricName;
         }
 
-        if (region) {
-          master.icToZone[icName] = region;
+        const normalizedZone = normalizeZone(region);
+        if (normalizedZone) {
+          master.icToZone[icName] = normalizedZone;
         }
 
         if (!master.icToPartners[icName]) {
