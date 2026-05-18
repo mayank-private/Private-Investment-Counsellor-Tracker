@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burgundy Private · Investment Counsellor Tracker · v3</title>
+
+    <!-- =========================================================
+     AXIS BANK · BURGUNDY PRIVATE
+     Investment Counsellor  (IC) Tracker — Enterprise Edition v2
+     Single-file deployment · Vanilla JS · SheetJS for Excel
+     =========================================================
+     Module map:
+       1. Styles (Burgundy-themed banking UI)
+       2. Configuration & default master data
+       3. Storage layer (localStorage + optional Firebase sync)
+       4. Real-time cross-device synchronisation
+       5. Audit / logging
+       6. Role-based access control (Admin / IC Member / Viewer)
+       7. Dynamic master file upload (Admin only)
+       8. UI controllers (Dashboard, Entry, Records, Reports, Master)
+       9. Excel / CSV / Print exporters
+========================================================= -->
+
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Premium banking typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+     HEADER
+========================================================= -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-mark">A</div>
+            <div class="brand-text">
+                <h1>Burgundy Private</h1>
+                <div class="subtitle">Investment Counsellor Tracker</div>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="item">
+                <span class="label">Sync</span>
+                <span id="syncStatus" class="badge offline" style="margin-top:2px;cursor:pointer;"
+                    title="Click to configure real-time sync (Admin only)"
+                    onclick="if(App._state().role==='ADMIN'){App.go('master');setTimeout(()=>{var el=document.getElementById('fbUrlInput');if(el)el.focus();},120);}">Local</span>
+            </div>
+            <div class="item">
+                <span class="label">Session</span>
+                <span class="value" id="sessionTime">—</span>
+            </div>
+            <div class="item">
+                <span class="label">User</span>
+                <select id="currentUser" class="role-select" style="width:170px;" onchange="App.setUser(this.value)">
+                    <option value="">— Select user —</option>
+                </select>
+            </div>
+            <div class="item">
+                <span class="label">Role</span>
+                <select id="currentRole" class="role-select" onchange="App.setRole(this.value)">
+                    <option value="ADMIN">Admin</option>
+                    <option value="IC_MEMBER" selected>IC Member</option>
+                    <option value="VIEWER">Viewer</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================
+     NAV
+========================================================= -->
+    <nav class="nav-bar">
+        <button class="nav-tab active" data-page="dashboard" onclick="App.go('dashboard')">Dashboard</button>
+        <button class="nav-tab" data-page="entry" onclick="App.go('entry')" data-perm="create">New IC Entry</button>
+        <button class="nav-tab" data-page="records" onclick="App.go('records')">All Records <span class="count"
+                id="navRecCount">0</span></button>
+        <button class="nav-tab" data-page="reports" onclick="App.go('reports')">Reports &amp; Export</button>
+        <button class="nav-tab" data-page="master" onclick="App.go('master')" data-perm="admin">Master File</button>
+    </nav>
+
+    <main class="app-main">
+
+        <!-- =========================================================
+       PAGE · DASHBOARD
+  ========================================================= -->
+        <section id="page-dashboard" class="page active">
+            <h2 class="section-title">Executive Overview</h2>
+            <div class="gold-rule"></div>
+            <p class="section-sub">Real-time snapshot of Investment Counsellor activity across all zones and partners.
+            </p>
+
+            <div class="kpi-grid" id="kpiGrid"></div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">Recent IC Decisions</div>
+                    <button class="btn btn-ghost btn-sm" onclick="App.go('records')">View all →</button>
+                </div>
+                <div class="table-wrap">
+                    <table class="data" id="recentTable">
+                        <thead>
+                            <tr>
+                                <th>IC Ref</th>
+                                <th>Date</th>
+                                <th>IC Member</th>
+                                <th>RIC</th>
+                                <th>Zone</th>
+                                <th>Partner</th>
+                                <th>Meeting</th>
+                                <th>Client Type</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">Zone &amp; Partner Distribution</div>
+                </div>
+                <div class="panel-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <div>
+                            <h5
+                                style="font-family:var(--font-display);font-size:16px;color:var(--burgundy-900);margin-bottom:10px;">
+                                By Zone</h5>
+                            <div id="zoneDist"></div>
+                        </div>
+                        <div>
+                            <h5
+                                style="font-family:var(--font-display);font-size:16px;color:var(--burgundy-900);margin-bottom:10px;">
+                                By Partner (Top 5)</h5>
+                            <div id="partnerDist"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+       PAGE · NEW ENTRY
+  ========================================================= -->
+        <section id="page-entry" class="page">
+            <h2 class="section-title" id="entryPageTitle">New Investment Counsellor Entry</h2>
+            <div class="gold-rule"></div>
+            <p class="section-sub">Log an IC meeting in nine simple fields. RIC is auto-mapped from IC Member. Drafts
+                auto-save every 15 seconds.</p>
+
+            <form id="icForm" class="panel" autocomplete="off" onsubmit="App.submitEntry(event)">
+                <div class="panel-head">
+                    <div class="panel-title" id="formTitle">IC Entry — Draft</div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <span id="draftStatus" class="mono" style="font-size:11px;color:var(--ink-500);">Not
+                            saved</span>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="App.saveDraft(true)">Save
+                            Draft</button>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="App.clearForm()">Reset</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>IC Reference No.</label>
+                            <input id="f_ref" type="text" readonly />
+                            <div class="hint">Auto-generated on submission (format MMYY_NNN)</div>
+                        </div>
+                        <div class="form-group">
+                            <label>IC Meeting Date <span class="req">*</span></label>
+                            <input id="f_date" type="date" required />
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>IC Member <span class="req">*</span></label>
+                            <select id="f_member" required onchange="App.onMemberChange()"></select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>RIC Name (auto-mapped)</label>
+                            <input id="f_ric" type="text" readonly placeholder="Select IC Member above" />
+                            <div class="hint">Auto-selected based on IC Member</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Zone <span class="req">*</span></label>
+                            <select id="f_zone" required></select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Partner Name <span class="req">*</span></label>
+                            <select id="f_partner" required></select>
+                            <div class="hint" id="partnerHint">Select IC Member to load mapped partners</div>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Type of Meeting <span class="req">*</span></label>
+                            <select id="f_meetingType" required></select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Product Category <span class="req">*</span></label>
+                            <select id="f_category" required></select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Client / Investor Name <span class="req">*</span></label>
+                            <input id="f_client" type="text" maxlength="120" required
+                                placeholder="Burgundy Private Client" />
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Type of Client <span class="req">*</span></label>
+                            <select id="f_clientType" required></select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group full">
+                            <label>Remarks / Outcomes <span
+                                    style="float:right;color:var(--ink-500);font-weight:500;letter-spacing:.3px;text-transform:none;font-size:11px;">Optional</span></label>
+                            <textarea id="f_remarks"
+                                placeholder="Counsellor note, decision rationale, follow-up actions…"></textarea>
+                            <div class="hint">Free-text notes — supports any length.</div>
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn-primary" id="btnSubmit">Submit Entry</button>
+                        <button type="button" class="btn btn-gold" onclick="App.saveDraft(true)">Save as Draft</button>
+                        <button type="button" class="btn btn-ghost" onclick="App.clearForm()">Discard</button>
+                        <button type="button" class="btn btn-ghost" id="btnCancelEdit" style="display:none;"
+                            onclick="App.cancelEdit()">Cancel Edit</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- =========================================================
+       PAGE · ALL RECORDS
+  ========================================================= -->
+        <section id="page-records" class="page">
+            <h2 class="section-title">IC Records Archive</h2>
+            <div class="gold-rule"></div>
+            <p class="section-sub" id="recordsSub">Browse submitted IC entries. Owners and admins can edit; everyone
+                with access can export filtered results in one click.</p>
+
+            <div class="panel">
+                <div class="filter-bar">
+                    <div class="form-group">
+                        <label>Search</label>
+                        <input id="filt_search" type="text" placeholder="Ref, client, partner…"
+                            oninput="App.renderRecords()" />
+                    </div>
+                    <div class="form-group">
+                        <label>From Date</label>
+                        <input id="filt_from" type="date" onchange="App.renderRecords()" />
+                    </div>
+                    <div class="form-group">
+                        <label>To Date</label>
+                        <input id="filt_to" type="date" onchange="App.renderRecords()" />
+                    </div>
+                    <div class="form-group">
+                        <label>Zone</label>
+                        <select id="filt_zone" onchange="App.renderRecords()">
+                            <option value="">All Zones</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Partner</label>
+                        <select id="filt_partner" onchange="App.renderRecords()">
+                            <option value="">All Partners</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Meeting Type</label>
+                        <select id="filt_meetingType" onchange="App.renderRecords()">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>IC Member</label>
+                        <select id="filt_member" onchange="App.renderRecords()">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>RIC</label>
+                        <select id="filt_ric" onchange="App.renderRecords()">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-ghost btn-sm" onclick="App.resetFilters()">Clear Filters</button>
+                        <button class="btn btn-primary btn-sm" onclick="App.exportFiltered('xlsx')">Export Filtered
+                            (Excel)</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportFiltered('csv')">Export Filtered
+                            (CSV)</button>
+                        <button class="btn btn-ink btn-sm" onclick="window.print()">Print View</button>
+                        <span id="filtCount"
+                            style="margin-left:auto;align-self:center;font-size:12px;color:var(--ink-500);font-weight:600;"></span>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data" id="recordsTable">
+                        <thead>
+                            <tr>
+                                <th>IC Ref</th>
+                                <th>Date</th>
+                                <th>IC Member</th>
+                                <th>RIC</th>
+                                <th>Zone</th>
+                                <th>Partner</th>
+                                <th>Category</th>
+                                <th>Meeting</th>
+                                <th>Client</th>
+                                <th>Client Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+       PAGE · REPORTS
+  ========================================================= -->
+        <section id="page-reports" class="page">
+            <h2 class="section-title">Reports &amp; Extracts</h2>
+            <div class="gold-rule"></div>
+            <p class="section-sub">Generate audit-ready MIS reports. All exports preserve exact stored values with no
+                transformation.</p>
+
+            <div class="export-grid">
+
+                <div class="export-card">
+                    <h4>Complete Master Report</h4>
+                    <p>All IC records ever submitted, with full master data. Use for archival, year-end review, or
+                        compliance.</p>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportAll('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportAll('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>Date Range MIS Report</h4>
+                    <p>Filter records between two dates for MIS reporting and management review.</p>
+                    <div style="display:flex;gap:6px;margin-bottom:10px;">
+                        <input id="rep_from" type="date" style="flex:1;" />
+                        <input id="rep_to" type="date" style="flex:1;" />
+                    </div>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportByDate('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportByDate('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>Zone-wise Report</h4>
+                    <p>All records for a selected zone with summary totals by region and partner.</p>
+                    <select id="rep_zone" style="margin-bottom:10px;">
+                        <option value="">— Select Zone —</option>
+                    </select>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportByZone('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportByZone('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>Partner-wise Report</h4>
+                    <p>All IC decisions for a specific partner across zones and product categories.</p>
+                    <select id="rep_partner" style="margin-bottom:10px;">
+                        <option value="">— Select Partner —</option>
+                    </select>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportByPartner('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportByPartner('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>User / IC Member Report</h4>
+                    <p>All IC entries submitted by a specific user. Useful for individual audit and performance review.
+                    </p>
+                    <select id="rep_user" style="margin-bottom:10px;">
+                        <option value="">— Select User —</option>
+                    </select>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportByUser('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportByUser('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>One-Click MIS Pack</h4>
+                    <p>Multi-sheet workbook: Master data, Summary by Zone, Summary by Partner, Status pivot, and full
+                        Audit log.</p>
+                    <button class="btn btn-primary btn-sm" style="width:100%;" onclick="App.exportMISPack()">Generate
+                        MIS Pack (Excel)</button>
+                </div>
+
+                <div class="export-card">
+                    <h4>Email-Ready Summary</h4>
+                    <p>Plain-text formatted summary ready to paste into management email. Includes KPIs and top
+                        approvals.</p>
+                    <button class="btn btn-primary btn-sm" style="width:100%;"
+                        onclick="App.emailReadySummary()">Generate Summary</button>
+                </div>
+
+                <div class="export-card">
+                    <h4>Audit Trail Export</h4>
+                    <p>Complete digital audit log with timestamps, user IDs, and actions. Full change history for
+                        compliance review.</p>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportAudit('xlsx')">Excel</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.exportAudit('csv')">CSV</button>
+                    </div>
+                </div>
+
+                <div class="export-card">
+                    <h4>Data Sync — Cross-Session</h4>
+                    <p>Export all records as a JSON backup to share with teammates or import on another device. Merge
+                        without duplicating.</p>
+                    <div class="export-card-row">
+                        <button class="btn btn-primary btn-sm" onclick="App.exportDataJSON()">Export JSON</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.importDataJSON()">Import JSON</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =========================================================
+       PAGE · MASTER FILE (Admin only)
+  ========================================================= -->
+        <section id="page-master" class="page">
+            <h2 class="section-title">Master Data Management</h2>
+            <div class="gold-rule"></div>
+            <p class="section-sub">Upload the latest Master Excel to refresh IC Members, Partners, Zones and RIC mapping
+                across the application. Admin only.</p>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">Real-Time Sync Setup</div>
+                    <span id="syncConfigStatus" class="mono"
+                        style="font-size:11px;color:var(--ink-500);">Checking…</span>
+                </div>
+                <div class="panel-body">
+                    <p style="font-size:13px;color:var(--ink-700);margin-bottom:12px;line-height:1.6;">
+                        When configured, every entry, edit, and master upload is pushed instantly to <strong>every
+                            admin</strong> on every
+                        device through a Firebase Realtime Database. Without it, this page works in local-only mode (one
+                        device, one browser).
+                    </p>
+                    <details
+                        style="margin-bottom:14px;font-size:12px;color:var(--ink-700);background:var(--burgundy-50);border-left:3px solid var(--gold-500);padding:10px 14px;border-radius:var(--radius);">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--burgundy-700);">One-time setup (5
+                            min)</summary>
+                        <ol style="margin:10px 0 0 20px;line-height:1.7;">
+                            <li>Go to <a href="https://console.firebase.google.com" target="_blank"
+                                    style="color:var(--burgundy-700);">Firebase Console</a> and sign in with any Google
+                                account.</li>
+                            <li>Click <strong>Add Project</strong> → give it a name (e.g. <em>burgundy-ic</em>) →
+                                continue (Google Analytics optional).</li>
+                            <li>In the left menu, click <strong>Build → Realtime Database → Create Database</strong>.
+                            </li>
+                            <li>Choose a location → <strong>Start in test mode</strong> → Enable.</li>
+                            <li>Copy the URL shown at the top of the database (looks like
+                                <code>https://burgundy-ic-default-rtdb.firebaseio.com</code>).
+                            </li>
+                            <li>Paste it below and click <strong>Save &amp; Connect</strong>.</li>
+                            <li>To onboard other admins, share this page with <code>?fb=&lt;your-url&gt;</code> appended
+                                — they'll auto-configure on first visit.</li>
+                        </ol>
+                        <p style="margin-top:10px;color:var(--ink-500);"><strong>Free tier:</strong> 1 GB storage, 10
+                            GB/month transfer — far more than this tracker will ever use.</p>
+                    </details>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <input id="fbUrlInput" type="text"
+                            placeholder="https://your-project-default-rtdb.firebaseio.com"
+                            style="flex:1;min-width:340px;padding:9px 12px;border:1px solid var(--ink-200);border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;" />
+                        <button class="btn btn-primary" onclick="App.saveFirebaseURL()">Save &amp; Connect</button>
+                        <button class="btn btn-ghost" onclick="App.clearFirebaseURL()">Disconnect</button>
+                        <button class="btn btn-gold btn-sm" onclick="App.copyShareLink()"
+                            title="Copy a share link with the Firebase URL embedded">Copy Share Link</button>
+                    </div>
+                    <p id="fbUrlHint" class="mono" style="font-size:11px;color:var(--ink-500);margin-top:10px;">—</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">Upload Master File</div>
+                    <span id="masterStatus" class="mono" style="font-size:11px;color:var(--ink-500);">No upload
+                        yet</span>
+                </div>
+                <div class="panel-body">
+                    <p style="font-size:13px;color:var(--ink-700);margin-bottom:14px;">
+                        Accepts the canonical <strong>Master_Excel_Tracker</strong> layout — a single sheet with columns
+                        <code>Region | RM_NAME | RM_EMP_ID | IC_NAME | IC_EMP_ID | RIC_NAME | confirmation</code> — and
+                        also the
+                        legacy two-sheet layout (<strong>RM_Data</strong> + <strong>IC_Zone_Map</strong>). Column names
+                        are matched case-insensitively.
+                        Regions are auto-grouped into <strong>South Zone</strong>, <strong>West Zone</strong>, and
+                        <strong>North-East Region</strong>.
+                        Upload replaces in-memory master and is pushed to all connected clients in real time (if sync is
+                        configured).
+                    </p>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <input type="file" id="masterFileInput" accept=".xlsx,.xls" style="display:none;"
+                            onchange="App.handleMasterUpload(event)" />
+                        <button class="btn btn-primary"
+                            onclick="document.getElementById('masterFileInput').click()">Choose Master Excel…</button>
+                        <button class="btn btn-gold" onclick="App.exportCurrentMaster()">Download Current
+                            Master</button>
+                        <button class="btn btn-ghost" onclick="App.resetMaster()">Restore Default Master</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">Current Master Summary</div>
+                </div>
+                <div class="panel-body">
+                    <div class="kpi-grid" id="masterKpi"></div>
+                    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                        <div>
+                            <h5
+                                style="font-family:var(--font-display);font-size:16px;color:var(--burgundy-900);margin-bottom:10px;">
+                                IC Members &amp; Partner Counts</h5>
+                            <div class="table-wrap" style="max-height:340px;overflow:auto;">
+                                <table class="data" id="masterICTable">
+                                    <thead>
+                                        <tr>
+                                            <th>IC Member</th>
+                                            <th>Zone</th>
+                                            <th>RIC</th>
+                                            <th>Partners</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <h5
+                                style="font-family:var(--font-display);font-size:16px;color:var(--burgundy-900);margin-bottom:10px;">
+                                Admin Roster</h5>
+                            <div class="table-wrap">
+                                <table class="data" id="adminTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Authorised Admin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <p style="font-size:11px;color:var(--ink-500);margin-top:8px;line-height:1.5;">
+                                Admin access is restricted to the names listed above. Any other user selecting the Admin
+                                role will be denied and reverted to IC Member.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- =========================================================
+     MODAL · Record Detail
+========================================================= -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) App.closeModal()">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="modalTitle">IC Record Detail</h3>
+                <button class="close-x" onclick="App.closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+     TOAST CONTAINER
+========================================================= -->
+    <div class="toast-container" id="toastContainer"></div>
+    <!-- =========================================================
+    ADMIN PASSWORD MODAL
+========================================================= -->
+    <div id="adminPasswordModal" class="admin-modal">
+        <div class="admin-modal-card">
+            <div class="admin-modal-top"></div>
+
+            <div class="admin-modal-header">
+                <div class="admin-modal-icon">A</div>
+
+                <div>
+                    <h3>Admin Authentication</h3>
+                    <p>Burgundy Private · Secure Access</p>
+                </div>
+            </div>
+
+            <div class="admin-modal-body">
+                <label>Enter Admin Password</label>
+
+                <div class="admin-password-wrap">
+                    <input type="password" id="adminPasswordInput" placeholder="Enter password" autocomplete="off" />
+                    <button type="button" class="admin-eye" onclick="App.toggleAdminPassword()">
+                        👁
+                    </button>
+                </div>
+
+                <div id="adminPasswordError" class="admin-password-error">
+                    Incorrect password
+                </div>
+            </div>
+
+            <div class="admin-modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="App.closeAdminPasswordModal()">
+                    Cancel
+                </button>
+
+                <button type="button" class="btn btn-primary" onclick="App.verifyAdminPassword()">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

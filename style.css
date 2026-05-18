@@ -1,0 +1,1086 @@
+/* =========================================================
+   1. DESIGN TOKENS  —  Axis Burgundy Private palette
+========================================================= */
+:root {
+  /* Brand */
+  --burgundy-900: #4a0e22;
+  --burgundy-800: #6a1530;
+  --burgundy-700: #7a1432; /* primary */
+  --burgundy-600: #8b1538;
+  --burgundy-500: #a02347;
+  --burgundy-100: #f5e8ec;
+  --burgundy-50: #fbf5f7;
+
+  --gold-700: #9a7b36;
+  --gold-600: #b8924c;
+  --gold-500: #c9a961; /* accent */
+  --gold-100: #f6efdc;
+
+  /* Neutrals */
+  --ink-900: #1a1313;
+  --ink-700: #3e3636;
+  --ink-500: #6b6363;
+  --ink-300: #b4adad;
+  --ink-200: #d9d3d3;
+  --ink-100: #ece6e6;
+  --paper: #fbf8f5;
+  --white: #ffffff;
+
+  /* Semantic */
+  --success: #1f7a4c;
+  --success-bg: #e4f2ea;
+  --warn: #b07a12;
+  --warn-bg: #fbf1d9;
+  --danger: #b23a2a;
+  --danger-bg: #fce6e2;
+  --info: #2c5e8c;
+  --info-bg: #e3eef8;
+
+  /* System */
+  --radius: 4px;
+  --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(74, 14, 34, 0.06);
+  --shadow-md: 0 4px 14px rgba(74, 14, 34, 0.08);
+  --shadow-lg: 0 12px 32px rgba(74, 14, 34, 0.12);
+  --tx: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --font-body:
+    'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* =========================================================
+   2. BASE
+========================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink-900);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* =========================================================
+   3. HEADER
+========================================================= */
+.app-header {
+  background: linear-gradient(
+    135deg,
+    var(--burgundy-800) 0%,
+    var(--burgundy-700) 60%,
+    var(--burgundy-900) 100%
+  );
+  color: var(--white);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--gold-500);
+  position: relative;
+  overflow: hidden;
+}
+.app-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 80% 50%,
+    rgba(201, 169, 97, 0.08) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1;
+}
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  background: var(--gold-500);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--burgundy-900);
+  letter-spacing: -1px;
+}
+.brand-text h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+.brand-text .subtitle {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  margin-top: 4px;
+  font-weight: 500;
+}
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 1;
+}
+.header-meta .item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.header-meta .label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.header-meta .value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white);
+}
+.role-pill {
+  background: var(--gold-500);
+  color: var(--burgundy-900);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.role-select {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  border: 1px solid rgba(201, 169, 97, 0.4);
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-size: 12px;
+}
+.role-select option {
+  color: var(--ink-900);
+}
+
+/* =========================================================
+   4. NAVIGATION
+========================================================= */
+.nav-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-100);
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.nav-tab {
+  padding: 16px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-500);
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid transparent;
+  transition: all var(--tx);
+  position: relative;
+}
+.nav-tab:hover {
+  color: var(--burgundy-700);
+  background: var(--burgundy-50);
+}
+.nav-tab.active {
+  color: var(--burgundy-700);
+  border-bottom-color: var(--burgundy-700);
+}
+.nav-tab .count {
+  background: var(--burgundy-100);
+  color: var(--burgundy-700);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   5. LAYOUT
+========================================================= */
+.app-main {
+  padding: 28px 32px 60px;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--burgundy-900);
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+.section-sub {
+  color: var(--ink-500);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+.gold-rule {
+  width: 48px;
+  height: 2px;
+  background: var(--gold-500);
+  margin-bottom: 18px;
+}
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* =========================================================
+   6. CARDS / KPI
+========================================================= */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--tx);
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--burgundy-700);
+}
+.kpi-card.gold::before {
+  background: var(--gold-500);
+}
+.kpi-card.green::before {
+  background: var(--success);
+}
+.kpi-card.amber::before {
+  background: var(--warn);
+}
+.kpi-card.red::before {
+  background: var(--danger);
+}
+.kpi-label {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--burgundy-900);
+  line-height: 1;
+}
+.kpi-foot {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--ink-500);
+}
+
+/* =========================================================
+   7. PANELS
+========================================================= */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--ink-100);
+  border-radius: var(--radius-lg);
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+.panel-head {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--ink-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--burgundy-50);
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--burgundy-900);
+}
+.panel-body {
+  padding: 22px;
+}
+
+/* =========================================================
+   8. FORMS
+========================================================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px 20px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group.full {
+  grid-column: 1 / -1;
+}
+label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-700);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+label .req {
+  color: var(--danger);
+  margin-left: 2px;
+}
+input[type='text'],
+input[type='number'],
+input[type='date'],
+input[type='email'],
+select,
+textarea {
+  border: 1px solid var(--ink-200);
+  background: var(--white);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  color: var(--ink-900);
+  transition: all var(--tx);
+  width: 100%;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--burgundy-700);
+  box-shadow: 0 0 0 3px var(--burgundy-100);
+}
+input[readonly] {
+  background: var(--paper);
+  color: var(--ink-700);
+  cursor: not-allowed;
+}
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+.field-error {
+  color: var(--danger);
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 500;
+  display: none;
+}
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+.form-group.error .field-error {
+  display: block;
+}
+.hint {
+  font-size: 11px;
+  color: var(--ink-500);
+  margin-top: 4px;
+}
+
+/* =========================================================
+   9. BUTTONS
+========================================================= */
+.btn {
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--tx);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--burgundy-700);
+  color: var(--white);
+}
+.btn-primary:hover {
+  background: var(--burgundy-800);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:disabled {
+  background: var(--ink-300);
+  cursor: not-allowed;
+}
+.btn-gold {
+  background: var(--gold-500);
+  color: var(--burgundy-900);
+}
+.btn-gold:hover {
+  background: var(--gold-600);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--burgundy-700);
+  border: 1px solid var(--burgundy-700);
+}
+.btn-ghost:hover {
+  background: var(--burgundy-50);
+}
+.btn-ink {
+  background: var(--ink-900);
+  color: var(--white);
+}
+.btn-ink:hover {
+  background: var(--ink-700);
+}
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+/* =========================================================
+   10. TABLES
+========================================================= */
+.table-wrap {
+  overflow-x: auto;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.data thead th {
+  background: var(--burgundy-700);
+  color: var(--white);
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+table.data thead th:last-child {
+  border-right: none;
+}
+table.data tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ink-100);
+  vertical-align: middle;
+}
+table.data tbody tr:hover {
+  background: var(--burgundy-50);
+}
+table.data tbody tr.edited {
+  background: var(--paper);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge.approved {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.badge.rejected {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.badge.pending {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.badge.deferred {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.badge.edited {
+  background: var(--gold-100);
+  color: var(--gold-700);
+}
+.badge.live {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.badge.offline {
+  background: var(--ink-100);
+  color: var(--ink-700);
+}
+
+/* =========================================================
+   11. FILTER BAR
+========================================================= */
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 18px 22px;
+  background: var(--burgundy-50);
+  border-bottom: 1px solid var(--ink-100);
+}
+.filter-bar .btn-row {
+  margin-top: 0;
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   12. EXPORT GRID
+========================================================= */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.export-card {
+  background: var(--white);
+  border: 1px solid var(--ink-100);
+  border-left: 3px solid var(--gold-500);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  transition: all var(--tx);
+}
+.export-card:hover {
+  box-shadow: var(--shadow-md);
+  border-left-color: var(--burgundy-700);
+}
+.export-card h4 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--burgundy-900);
+  margin-bottom: 6px;
+}
+.export-card p {
+  font-size: 12px;
+  color: var(--ink-500);
+  margin-bottom: 14px;
+  min-height: 32px;
+}
+.export-card .btn {
+  width: 100%;
+  justify-content: center;
+}
+.export-card-row {
+  display: flex;
+  gap: 8px;
+}
+.export-card-row .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* =========================================================
+   13. TOAST NOTIFICATIONS
+========================================================= */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+.toast {
+  background: var(--white);
+  border-left: 4px solid var(--success);
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 280px;
+  max-width: 400px;
+  font-size: 13px;
+  animation: slideIn 0.3s ease;
+}
+.toast.error {
+  border-left-color: var(--danger);
+}
+.toast.warn {
+  border-left-color: var(--warn);
+}
+.toast.info {
+  border-left-color: var(--info);
+}
+.toast strong {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+.toast small {
+  color: var(--ink-500);
+  font-size: 11px;
+}
+@keyframes slideIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   14. MODAL
+========================================================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 19, 19, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+.modal-backdrop.show {
+  display: flex;
+}
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 760px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border-top: 3px solid var(--gold-500);
+}
+.modal-head {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--ink-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--burgundy-50);
+}
+.modal-head h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--burgundy-900);
+  font-weight: 600;
+}
+.modal-body {
+  padding: 24px;
+}
+.close-x {
+  font-size: 22px;
+  color: var(--ink-500);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.close-x:hover {
+  background: var(--burgundy-100);
+  color: var(--burgundy-700);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 24px;
+}
+.detail-item .l {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.detail-item .v {
+  font-size: 14px;
+  color: var(--ink-900);
+  font-weight: 500;
+  word-wrap: break-word;
+}
+
+/* =========================================================
+   15. AUDIT LOG
+========================================================= */
+.audit-row {
+  display: grid;
+  grid-template-columns: 180px 110px 140px 1fr;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ink-100);
+  font-size: 13px;
+  align-items: center;
+}
+.audit-row:hover {
+  background: var(--burgundy-50);
+}
+.audit-row .ts {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-500);
+}
+.audit-row .act {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.audit-row .act.create {
+  color: var(--success);
+}
+.audit-row .act.edit {
+  color: var(--info);
+}
+.audit-row .act.lock {
+  color: var(--burgundy-700);
+}
+.audit-row .act.export {
+  color: var(--gold-700);
+}
+.audit-row .act.delete {
+  color: var(--danger);
+}
+.audit-row .act.login {
+  color: var(--ink-700);
+}
+
+/* =========================================================
+   16. UTILITY / RESPONSIVE
+========================================================= */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-500);
+}
+.empty-state .icon {
+  font-family: var(--font-display);
+  font-size: 56px;
+  color: var(--burgundy-100);
+  margin-bottom: 12px;
+}
+.row-actions {
+  display: flex;
+  gap: 6px;
+}
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--ink-500);
+  transition: all var(--tx);
+}
+.icon-btn:hover {
+  background: var(--burgundy-100);
+  color: var(--burgundy-700);
+}
+.icon-btn.danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* =========================================================
+  17. ADMIN PASSWORD MODAL
+========================================================= */
+
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 19, 19, 0.58);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+}
+
+.admin-modal.show {
+  display: flex;
+  animation: fadeIn 0.18s ease;
+}
+
+.admin-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--white);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(74, 14, 34, 0.08);
+  animation: modalPop 0.22s ease;
+}
+
+.admin-modal-top {
+  height: 5px;
+  background: linear-gradient(90deg, var(--gold-500), var(--burgundy-700));
+}
+
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 26px 28px 18px;
+}
+
+.admin-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--burgundy-700), var(--burgundy-900));
+  color: var(--gold-500);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+}
+
+.admin-modal-header h3 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--burgundy-900);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.admin-modal-header p {
+  font-size: 12px;
+  color: var(--ink-500);
+  letter-spacing: 0.5px;
+}
+
+.admin-modal-body {
+  padding: 0 28px 24px;
+}
+
+.admin-modal-body label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.admin-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--burgundy-700);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--white);
+  transition: all var(--tx);
+  box-shadow: 0 2px 10px rgba(74, 14, 34, 0.05);
+}
+
+.admin-password-wrap:focus-within {
+  border-color: var(--burgundy-800);
+  box-shadow: 0 0 0 4px var(--burgundy-100);
+}
+
+.admin-password-wrap input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  height: 58px;
+  padding: 0 18px;
+  font-size: 16px;
+  flex: 1;
+  background: transparent;
+}
+
+.admin-password-wrap input::placeholder {
+  color: var(--ink-300);
+}
+
+.admin-eye {
+  width: 64px;
+  height: 58px;
+  border-left: 1px solid var(--ink-100);
+  display: grid;
+  place-items: center;
+  color: var(--ink-500);
+  font-size: 20px;
+  background: rgba(245, 232, 236, 0.35);
+  transition: all var(--tx);
+}
+
+.admin-eye:hover {
+  background: var(--burgundy-50);
+  color: var(--burgundy-700);
+}
+
+.admin-password-error {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-password-error.show {
+  display: block;
+}
+
+.admin-modal-actions {
+  padding: 20px 28px 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--ink-100);
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .nav-bar,
+  .app-header,
+  .btn-row,
+  .row-actions,
+  .toast-container,
+  .filter-bar {
+    display: none !important;
+  }
+  .app-main {
+    padding: 0;
+  }
+  .panel {
+    box-shadow: none;
+    border: 1px solid #aaa;
+  }
+  table.data thead th {
+    background: #333 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body {
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  .header-meta {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .app-main {
+    padding: 18px 14px;
+  }
+  .nav-bar {
+    padding: 0 8px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    padding: 14px 14px;
+    font-size: 12px;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .audit-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
