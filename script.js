@@ -540,15 +540,16 @@ const App = (function () {
       'Investment Pitch',
       'Handover',
       'Documentation',
+      'Winback',
       'Others',
     ],
 
-    clientTypes: ['Existing to Bank', 'New to Bank', 'New to Investment'],
+    clientTypes: ['Existing', 'NTB', 'NTI'],
 
     categories: [
       'AIF/PMS',
       'Mutual Funds',
-      'Private Equity',
+      'Unlisted',
       'Multiple Products',
       'Others',
     ],
@@ -2150,20 +2151,41 @@ const App = (function () {
       .size;
     const activeZones = new Set(recs.map((r) => r.zone).filter(Boolean)).size;
 
+    const rows = getVisibleRecords();
+
+    // Unique partners covered in CURRENT MONTH only
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    const monthlyPartners = new Set();
+
+    rows.forEach((r) => {
+      if (!r.partner || !r.date) return;
+
+      const recordMonth = String(r.date).slice(0, 7);
+
+      if (recordMonth === currentMonth) {
+        monthlyPartners.add(r.partner.trim());
+      }
+    });
+
+    const uniquePartnersPerMonth = monthlyPartners.size;
     const scopeLabel =
       state.role === 'ADMIN'
         ? 'All India'
         : state.role === 'IC_MEMBER'
           ? 'My entries'
           : 'Read-only';
-
     kpi.innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Total Entries (${scopeLabel})</div><div class="kpi-value">${total}</div><div class="kpi-foot">All-time IC submissions</div></div>
     <div class="kpi-card green"><div class="kpi-label">This Month</div><div class="kpi-value">${mtd}</div><div class="kpi-foot">Entries logged month-to-date</div></div>
     <div class="kpi-card amber"><div class="kpi-label">Today</div><div class="kpi-value">${todayCount}</div><div class="kpi-foot">Entries logged today</div></div>
     <div class="kpi-card gold"><div class="kpi-label">Unique Clients</div><div class="kpi-value">${uniqueClients}</div><div class="kpi-foot">Distinct investors covered</div></div>
     <div class="kpi-card"><div class="kpi-label">IC Members Active</div><div class="kpi-value">${uniqueMembers}</div><div class="kpi-foot">Distinct ICs who have logged</div></div>
-    <div class="kpi-card red"><div class="kpi-label">Zones Covered</div><div class="kpi-value">${activeZones}</div><div class="kpi-foot">Distinct zones with activity</div></div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Unique Partners Covered Per Month</div>
+      <div class="kpi-value">${uniquePartnersPerMonth}</div>
+      <div class="kpi-foot">Distinct partners covered in current month</div>
+    </div>
   `;
 
     // Recent table
@@ -2364,7 +2386,7 @@ const App = (function () {
       <div class="detail-item"><div class="l">Partner Name</div><div class="v">${escapeHtml(r.partner)}</div></div>
       <div class="detail-item"><div class="l">Type of Meeting</div><div class="v">${escapeHtml(r.meetingType || '')}</div></div>
       <div class="detail-item"><div class="l">Product Category</div><div class="v">${escapeHtml(r.category)}</div></div>
-      <div class="detail-item"><div class="l">Client / Investor</div><div class="v">${escapeHtml(r.client)}</div></div>
+      <div class="detail-item"><div class="l">Client</div><div class="v">${escapeHtml(r.client)}</div></div>
       <div class="detail-item"><div class="l">Type of Client</div><div class="v">${escapeHtml(r.clientType || '')}</div></div>
       <div class="detail-item"><div class="l">Submitted By</div><div class="v">${escapeHtml(r.submittedBy)}</div></div>
       <div class="detail-item"><div class="l">Submitted At</div><div class="v">${fmtDateTime(r.submittedAt)}</div></div>
