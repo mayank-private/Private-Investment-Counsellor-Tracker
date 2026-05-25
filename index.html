@@ -215,6 +215,16 @@
                             <div class="field-error">Required</div>
                         </div>
                         <div class="form-group">
+                            <label>Mode of Meeting <span class="req">*</span></label>
+                            <select id="f_meetingMode" required>
+                                <option value="">Select Mode</option>
+                                <option value="In Person">In Person</option>
+                                <option value="Virtual">Virtual</option>
+                                <option value="Portfolio Analytics">Portfolio Analytics</option>
+                            </select>
+                            <div class="field-error">Required</div>
+                        </div>
+                        <div class="form-group">
                             <label>Type of Meeting <span class="req">*</span></label>
                             <select id="f_meetingType" required></select>
                             <div class="field-error">Required</div>
@@ -324,6 +334,7 @@
                                 <th>Meeting</th>
                                 <th>Client</th>
                                 <th>Client Type</th>
+                                <th>Mode of Meeting</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>

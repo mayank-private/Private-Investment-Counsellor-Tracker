@@ -1944,6 +1944,7 @@ const App = (function () {
       category: $('f_category').value,
       client: $('f_client').value.trim(),
       clientType: $('f_clientType').value,
+      meetingMode: $('f_meetingMode').value,
       remarks: $('f_remarks').value.trim(),
     };
   }
@@ -1961,6 +1962,7 @@ const App = (function () {
     $('f_category').value = d.category || '';
     $('f_client').value = d.client || '';
     $('f_clientType').value = d.clientType || '';
+    $('f_meetingMode').value = d.meetingMode || '';
     $('f_remarks').value = d.remarks || '';
   }
   function saveDraft(announce) {
@@ -2323,6 +2325,7 @@ const App = (function () {
       <td>${escapeHtml(r.meetingType || '')}</td>
       <td>${escapeHtml(r.client)}</td>
       <td>${escapeHtml(r.clientType || '')}</td>
+      <td>${escapeHtml(r.meetingMode || '')}</td>
       <td>${r.editedAt ? '<span class="badge edited">Edited</span>' : '<span class="badge approved">Submitted</span>'}</td>
       <td>
         <div class="row-actions">
@@ -2451,6 +2454,7 @@ const App = (function () {
     { k: 'category', h: 'Product Category' },
     { k: 'client', h: 'Client / Investor' },
     { k: 'clientType', h: 'Type of Client' },
+    { k: 'meetingMode', h: 'Mode of Meeting' },
     { k: 'remarks', h: 'Remarks / Outcomes' },
     { k: 'submittedBy', h: 'Submitted By' },
     { k: 'submittedAt', h: 'Submitted At (UTC)' },
