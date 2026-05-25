@@ -1017,23 +1017,38 @@ const App = (function () {
   function $(id) {
     return document.getElementById(id);
   }
-  function fmtDateTime(iso) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  function pad2(n) {
+    return String(n).padStart(2, '0');
   }
-  function fmtDate(iso) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+
+  function fmtDate(dateStr) {
+    if (!dateStr) return '';
+
+    // Handle YYYY-MM-DD safely without timezone issues
+    const parts = dateStr.split('-');
+
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    const d = new Date(dateStr);
+
+    if (isNaN(d)) return '';
+
+    return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+  }
+
+  function fmtDateTime(dateStr) {
+    if (!dateStr) return '';
+
+    const d = new Date(dateStr);
+
+    if (isNaN(d)) return '';
+
+    return (
+      `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} ` +
+      `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+    );
   }
   function escapeHtml(s) {
     if (s == null) return '';
