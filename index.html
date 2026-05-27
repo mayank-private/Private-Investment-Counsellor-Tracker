@@ -70,8 +70,8 @@
                 <span class="label">Role</span>
                 <select id="currentRole" class="role-select" onchange="App.setRole(this.value)">
                     <option value="ADMIN">Admin</option>
-                    <option value="IC_MEMBER" selected>IC Member</option>
-                    <option value="VIEWER">Viewer</option>
+                    <option value="IC_MEMBER">IC Member</option>
+                    <option value="VIEWER" selected>Viewer</option>
                 </select>
             </div>
         </div>
@@ -647,6 +647,50 @@
                 </button>
 
                 <button type="button" class="btn btn-primary" onclick="App.verifyAdminPassword()">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+IC MEMBER PASSWORD MODAL
+========================================================= -->
+    <div id="icPasswordModal" class="admin-modal">
+        <div class="admin-modal-card">
+            <div class="admin-modal-top"></div>
+
+            <div class="admin-modal-header">
+                <div class="admin-modal-icon">I</div>
+
+                <div>
+                    <h3>IC Member Authentication</h3>
+                    <p>Burgundy Private · Secure Login</p>
+                </div>
+            </div>
+
+            <div class="admin-modal-body">
+                <label>Enter Password</label>
+
+                <div class="admin-password-wrap">
+                    <input type="password" id="icPasswordInput" placeholder="Enter password" autocomplete="off" />
+
+                    <button type="button" class="admin-eye" onclick="App.toggleICPassword()">
+                        👁
+                    </button>
+                </div>
+
+                <div id="icPasswordError" class="admin-password-error">
+                    Incorrect password
+                </div>
+            </div>
+
+            <div class="admin-modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="App.closeICPasswordModal()">
+                    Cancel
+                </button>
+
+                <button type="button" class="btn btn-primary" onclick="App.verifyICPassword()">
                     Continue
                 </button>
             </div>

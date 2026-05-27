@@ -559,6 +559,7 @@ const App = (function () {
     icToRic: {},
     icToZone: {},
     icToPartners: {},
+    icPasswords: {},
   };
 
   function normalizeZone(region) {
@@ -619,6 +620,8 @@ const App = (function () {
           row.RIC_NAME || row['RIC NAME'] || row.ric_name || '',
         ).trim();
 
+        const password = String(row.password || row.PASSWORD || '').trim();
+
         if (!icName) return;
 
         icSet.add(icName);
@@ -626,6 +629,10 @@ const App = (function () {
         if (ricName) {
           ricSet.add(ricName);
           master.icToRic[icName] = ricName;
+        }
+
+        if (password) {
+          master.icPasswords[icName] = password;
         }
 
         const normalizedZone = normalizeZone(region);
@@ -721,7 +728,7 @@ const App = (function () {
     // Always start fresh session
     user: '',
 
-    role: 'IC_MEMBER',
+    role: 'VIEWER',
 
     page: 'dashboard',
 
@@ -1090,7 +1097,7 @@ const App = (function () {
 
     // Optional visual reset
     if (!hasUser) {
-      roleEl.value = 'IC_MEMBER';
+      roleEl.value = 'VIEWER';
     }
   }
 
@@ -1266,9 +1273,9 @@ const App = (function () {
     state.user = (u || '').trim();
 
     if (!state.user) {
-      state.role = 'IC_MEMBER';
+      state.role = 'VIEWER';
 
-      $('currentRole').value = 'IC_MEMBER';
+      $('currentRole').value = 'VIEWER';
     }
 
     // Normalize admin aliases
@@ -1351,6 +1358,24 @@ const App = (function () {
     }
 
     // ===== NON-ADMIN ROLE =====
+
+    // ===== IC MEMBER PASSWORD CHECK =====
+
+    if (r === 'IC_MEMBER') {
+      if (!state.user) {
+        toast('error', 'Select User', 'Please select a user first.');
+
+        $('currentRole').value = previous;
+
+        return;
+      }
+
+      openICPasswordModal(previous);
+
+      return;
+    }
+
+    // ===== VIEWER ROLE =====
 
     state.role = r;
 
@@ -1452,8 +1477,80 @@ const App = (function () {
     refreshAll();
   }
 
+  function openICPasswordModal(previousRole) {
+    const modal = $('icPasswordModal');
+
+    modal.classList.add('show');
+
+    $('icPasswordInput').value = '';
+
+    $('icPasswordError').classList.remove('show');
+
+    modal.dataset.previousRole = previousRole || 'VIEWER';
+
+    setTimeout(() => {
+      $('icPasswordInput').focus();
+    }, 80);
+  }
+
+  function closeICPasswordModal(resetRole = true) {
+    const modal = $('icPasswordModal');
+
+    modal.classList.remove('show');
+
+    if (resetRole) {
+      const previous = modal.dataset.previousRole || 'VIEWER';
+
+      $('currentRole').value = previous;
+    }
+
+    $('icPasswordInput').value = '';
+
+    $('icPasswordError').classList.remove('show');
+  }
+
+  function verifyICPassword() {
+    const entered = $('icPasswordInput').value;
+
+    const actualPassword = MASTER.icPasswords[state.user];
+
+    if (!actualPassword || entered !== actualPassword) {
+      $('icPasswordError').classList.add('show');
+
+      return;
+    }
+
+    state.role = 'IC_MEMBER';
+
+    saveJSON(KEY_ROLE, state.role);
+
+    saveJSON(KEY_USER, state.user);
+
+    $('currentRole').value = 'IC_MEMBER';
+
+    refreshUserSelect();
+
+    $('currentUser').value = state.user;
+
+    applyRolePermissions();
+
+    logAudit('ROLE_CHANGE', null, 'IC login successful');
+
+    toast('success', 'Login Successful', 'Welcome ' + state.user);
+
+    closeICPasswordModal(false);
+
+    refreshAll();
+  }
+
   function toggleAdminPassword() {
     const input = $('adminPasswordInput');
+
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  function toggleICPassword() {
+    const input = $('icPasswordInput');
 
     input.type = input.type === 'password' ? 'text' : 'password';
   }
@@ -3434,6 +3531,10 @@ const App = (function () {
     closeAdminPasswordModal,
     verifyAdminPassword,
     toggleAdminPassword,
+    toggleICPassword,
+    openICPasswordModal,
+    closeICPasswordModal,
+    verifyICPassword,
     toast,
     _init: init,
     _state: () => state,
