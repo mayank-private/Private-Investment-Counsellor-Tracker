@@ -1330,7 +1330,7 @@ const App = (function () {
   }
 
   let pendingRole = null;
-  const ADMIN_PASSWORD = 'qwer1234';
+  const ADMIN_PASSWORD = 'Bpc#Ic@4409';
 
   function setRole(r) {
     const previous = state.role;
