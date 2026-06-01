@@ -1272,6 +1272,15 @@ const App = (function () {
 
     state.user = (u || '').trim();
 
+    // User changed -> invalidate login
+    if (old && old !== state.user) {
+      state.role = 'VIEWER';
+
+      saveJSON(KEY_ROLE, 'VIEWER');
+
+      $('currentRole').value = 'VIEWER';
+    }
+
     if (!state.user) {
       state.role = 'VIEWER';
 
